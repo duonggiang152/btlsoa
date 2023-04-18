@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add product</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', sans-serif;
+        }
+
+        form {
+            display: flex;
+            justify-content: center;
+            flex-flow: column;
+        }
+
+        form>input,
+        label {
+            margin: 20px;
+        }
+
+        #process-step>div {
+            color: black;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Nhập thông tin</h1>
+
+    <form action="">
+        <input id="id-product" type="text" placeholder="id of product" name="id">
+        <input id="name-product" type="text" placeholder="name" name="name">
+        <input id="price-product" type="text" placeholder="price" name="price">
+        <label>image <input type="file" id="image" name="image" placeholder="image"></label>
+        <label for="video">video <input type="file" id="image" name="video" placeholder="video"></label>
+
+    </form>
+    <button type="submit">submit</button>
+    <h2>Business process</h2>
+    <div id="process-step">
+        <div>1. Nhân yêu cầu đưa thông tin sản phẩm lên hệ thống (Người dụng nhập các thông tin bao gồm mẫu mã,
+            số lượng, ảnh minh họa, video minh họa về sản phẩm)
+        </div>
+        <div>
+            2. Kiểm tra xem sản phẩm đã có trên kho của khách hàng chưa, chưa có tạo mới, có thì chỉnh sửa thông tin sản
+            phẩm
+        </div>
+        <div>
+            3. Tạo mới sản phẩm
+        </div>
+        <div>
+            4. Chỉnh sửa thông tin sản phẩm
+        </div>
+        <div>
+            5. Xử lý ảnh trong sản phẩm(Phân loại, sử lý độ phân giải để phù hợp với các loại client:
+            browser web, app mobile, desktop app)
+        </div>
+        <div>6. Xử lý video sản phẩm(Phân loại, sử lý độ phân giải của video để vù hợp với nhiều khoảng
+            bitrate)
+        </div>
+        <div>7. Gửi thông báo có sản phẩm mới cho admin kiểm tra
+        </div>
+        <div>9. Đưa thông tin sản phẩm mới vào hệ thống gợi ý
+        </div>
+        <div>10. Tạo link quảng cáo sản phẩm cho affilicate
+        </div>
+        <div>11. Gửi thông tin sản phẩm vào hệ thống analyst
+        </div>
+        <div>12. Gửi thông báo, tạo sản phẩm mới trong kho thành công
+        </div>
+    </div>
+    <script>
+        let jwt;
+        const login = async () => {
+            const data = {
+                "email": "giang",
+                "password": "123456"
+            }
+            await fetch('/user/authentication', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    return response.json()
+                })
+                .then(data => {
+          
+                    jwt = data.jwt
+                    return data
+                })
+                .catch(error => console.error(error));
+        }
+        const makeaddproduct = async () => {
+            const id_product = document.getElementById("id-product");
+            const name_product = document.getElementById("name-product");
+            const price_product = document.getElementById("price-product");
+            const data = {
+                id: id_product.value,
+                name: name_product.value,
+                price: price_product.value,
+            }
+            await fetch('/add-product', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json',
+                "Authorization": `Bearer ${jwt}` },
+                body: JSON.stringify(data)
+            })
+                .then(response => {
+                    return response.json()
+                })
+                .then(data => {
+                    console.log(data)
+                    return data
+                })
+                .catch(error => console.error(error));
+        }
+        const start = async () => {
+            
+            await login();
+            await makeaddproduct()
+
+        }
+        start()
+    </script>
+</body>
+
+</html>
