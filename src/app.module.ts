@@ -8,6 +8,12 @@ import { UserModule } from './user/user.module';
 import { AddProductModule } from './add-product/add-product.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { IoAdapter } from '@nestjs/platform-socket.io';
+import { SocketIoAdapter } from './socketio.adapter';
+import { AppGateway } from './app.gateway';
+import { MiddlewareConsumer, } from '@nestjs/common/interfaces/middleware/middleware-consumer.interface';
+import { NotificationModule } from './notification/notification.module';
+
 @Module({
   imports: [
     AuthModule,
@@ -26,9 +32,13 @@ import { join } from 'path';
     ServeStaticModule.forRoot({
       rootPath: join(__dirname,'', 'static'),
     }),
-    AddProductModule
+    AddProductModule,
+    NotificationModule,
+    // Add the adapter to the providers array
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, AppGateway],
 })
-export class AppModule {}
+export class AppModule {
+  
+}

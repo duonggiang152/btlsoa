@@ -7,13 +7,14 @@ import { Model } from 'mongoose';
 
 @Injectable()
 export class AddProductService {
-  constructor(@InjectModel(Product.name) private productModel: Model<Product>) {}
-  create(createAddProductDto: CreateAddProductDto) {
+  constructor(@InjectModel(Product.name) private productModel: Model<Product>,) { }
+  create(createAddProductDto: CreateAddProductDto, user) {
+    delete createAddProductDto.id
     console.log(createAddProductDto)
-    const product = new this.productModel(createAddProductDto);
-    
+    const product = new this.productModel({ ...createAddProductDto, userId: user._id  });
+
     return product.save();
   }
 
- 
+
 }

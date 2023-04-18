@@ -26,7 +26,12 @@
             color: black;
             font-weight: 600;
         }
+        #result {
+            font-weight: 600;
+            font-size: 30px;
+        }
     </style>
+    <script src="/socket.io/socket.io.js"></script>
 </head>
 
 <body>
@@ -40,42 +45,47 @@
         <label for="video">video <input type="file" id="image" name="video" placeholder="video"></label>
 
     </form>
-    <button type="submit">submit</button>
+    <button type="submit" onclick="start()">submit</button>
     <h2>Business process</h2>
     <div id="process-step">
-        <div>1. Nhân yêu cầu đưa thông tin sản phẩm lên hệ thống (Người dụng nhập các thông tin bao gồm mẫu mã,
+        <div id="step-1">1. Nhân yêu cầu đưa thông tin sản phẩm lên hệ thống (Người dụng nhập các thông tin bao gồm mẫu mã,
             số lượng, ảnh minh họa, video minh họa về sản phẩm)
         </div>
-        <div>
+        <div id="step-2">
             2. Kiểm tra xem sản phẩm đã có trên kho của khách hàng chưa, chưa có tạo mới, có thì chỉnh sửa thông tin sản
             phẩm
         </div>
-        <div>
+        <div id="step-3">
             3. Tạo mới sản phẩm
         </div>
-        <div>
+        <div id="step-4">
             4. Chỉnh sửa thông tin sản phẩm
         </div>
-        <div>
+        <div id="step-5">
             5. Xử lý ảnh trong sản phẩm(Phân loại, sử lý độ phân giải để phù hợp với các loại client:
             browser web, app mobile, desktop app)
         </div>
-        <div>6. Xử lý video sản phẩm(Phân loại, sử lý độ phân giải của video để vù hợp với nhiều khoảng
+        <div id="step-6">6. Xử lý video sản phẩm(Phân loại, sử lý độ phân giải của video để vù hợp với nhiều khoảng
             bitrate)
         </div>
-        <div>7. Gửi thông báo có sản phẩm mới cho admin kiểm tra
+        <div id="step-7">7. Gửi thông báo có sản phẩm mới cho admin kiểm tra
         </div>
-        <div>9. Đưa thông tin sản phẩm mới vào hệ thống gợi ý
+        <div id="step-9">9. Đưa thông tin sản phẩm mới vào hệ thống gợi ý
         </div>
-        <div>10. Tạo link quảng cáo sản phẩm cho affilicate
+        <div id="step-10">10. Tạo link quảng cáo sản phẩm cho affilicate
         </div>
-        <div>11. Gửi thông tin sản phẩm vào hệ thống analyst
+        <div id="step-11">11. Gửi thông tin sản phẩm vào hệ thống analyst
         </div>
-        <div>12. Gửi thông báo, tạo sản phẩm mới trong kho thành công
+        <div id="step-12">12. Gửi thông báo, tạo sản phẩm mới trong kho thành công
         </div>
     </div>
+    <div id="result"></div>
     <script>
         let jwt;
+        const dataUser = {
+                "email": "giang",
+                "password": "123456"
+            }
         const login = async () => {
             const data = {
                 "email": "giang",
@@ -96,6 +106,7 @@
                 })
                 .catch(error => console.error(error));
         }
+        login();
         const makeaddproduct = async () => {
             const id_product = document.getElementById("id-product");
             const name_product = document.getElementById("name-product");
@@ -103,8 +114,9 @@
             const data = {
                 id: id_product.value,
                 name: name_product.value,
-                price: price_product.value,
+                price: parseInt(price_product.value) ,
             }
+            const ele1 = document.getElementById(`step-1`)
             await fetch('/add-product', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json',
@@ -112,21 +124,51 @@
                 body: JSON.stringify(data)
             })
                 .then(response => {
+                    console.log(response)
+                    if(response.status === 500) {
+                        ele1.style.color = "red"
+                    }
+                    else
+                    ele1.style.color = "blue"
                     return response.json()
                 })
                 .then(data => {
                     console.log(data)
                     return data
                 })
-                .catch(error => console.error(error));
+                .catch(error => {
+                    
+                    console.error(error)
+                });
         }
+        
         const start = async () => {
-            
-            await login();
+            for(let i = 0; i < 11; i++) {
+                if(document.getElementById(`step-${i}`)) {
+                    document.getElementById(`step-${i}`).style.color = "black"
+                }
+            }
+            console.log("ok")
             await makeaddproduct()
 
         }
-        start()
+        const socket = io('localhost:3000');
+        // listen to the 'connect' event
+        socket.on('task', (payload) => {
+            console.log(payload);
+            if(payload.user === dataUser.email) {
+                if(document.getElementById(`step-${payload.id}`))
+                document.getElementById(`step-${payload.id}`).style.color = (payload.result == false ? "red" : "blue")
+            }
+        });
+        socket.on('done', (payload) => {
+            console.log(payload)
+                document.getElementById(`result`).style.color = (payload.result == false ? "red" : "blue")
+                document.getElementById(`result`).innerHTML = "DONE"
+                setTimeout(() => {
+                    document.getElementById(`result`).innerHTML = ""
+                }, 3000)
+        });
     </script>
 </body>
 
